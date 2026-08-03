@@ -1,0 +1,66 @@
+@import url("https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+.splash-screen {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  background: #000;
+  color: #f2eee5;
+  font-family: "Pixelify Sans", "Courier New", monospace;
+}
+
+.splash-screen__credit {
+  animation: studio-credit 2.6s ease-in-out forwards;
+  opacity: 0;
+  text-align: center;
+}
+
+.splash-screen__credit p,
+.splash-screen__credit h1 {
+  margin: 0;
+}
+
+.splash-screen__credit p {
+  margin-bottom: 0.55rem;
+  color: #b8b1a4;
+  font-size: clamp(0.75rem, 1.3vw, 0.95rem);
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.splash-screen__credit h1 {
+  color: #fff8e8;
+  font-size: clamp(2.25rem, 5.5vw, 4.75rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 12px rgba(242, 222, 174, 0.18);
+}
+
+@keyframes studio-credit {
+  0%, 100% {
+    opacity: 0;
+  }
+
+  28%, 70% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen__credit {
+    animation: none;
+    opacity: 1;
+  }
+}

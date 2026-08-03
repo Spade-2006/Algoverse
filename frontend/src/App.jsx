@@ -1,6 +1,13 @@
+import "./App.css";
+
 function App() {
   return (
-    <h1>AlgoVerse</h1>
+    <main className="splash-screen" aria-label="Spade Studios splash screen">
+      <div className="splash-screen__credit">
+        <p>Powered by</p>
+        <h1>Spade Studios</h1>
+      </div>
+    </main>
   )
 }
 
