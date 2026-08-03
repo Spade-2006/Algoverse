@@ -277,6 +277,103 @@ body,
   outline-offset: 0.35rem;
 }
 
+.exit-dialog-backdrop {
+  position: absolute;
+  z-index: 12;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background: rgba(2, 5, 14, 0.58);
+  animation: dialog-fade-in 220ms ease-out both;
+}
+
+.exit-dialog {
+  width: min(25rem, 100%);
+  padding: 2rem 2.5rem;
+  border: 3px solid #c99b47;
+  outline: 2px solid #45270f;
+  outline-offset: -0.65rem;
+  background: linear-gradient(145deg, #d9c08a, #a9793f);
+  box-shadow: inset 0 0 0 0.45rem rgba(79, 46, 19, 0.35), 0 0 30px rgba(0, 0, 0, 0.75);
+  color: #351d0b;
+  text-align: center;
+  animation: dialog-rise-in 280ms ease-out both;
+}
+
+.exit-dialog h2 {
+  margin: 0;
+  font: 400 clamp(0.85rem, 2vw, 1.15rem) "Press Start 2P", "Courier New", monospace;
+  line-height: 1.6;
+  text-shadow: 0 1px 0 rgba(255, 243, 204, 0.7);
+}
+
+.exit-dialog__options {
+  display: flex;
+  justify-content: center;
+  gap: 1.4rem;
+  margin-top: 1.5rem;
+}
+
+.exit-dialog__option {
+  border: 0;
+  padding: 0.35rem 0;
+  background: transparent;
+  color: rgba(53, 29, 11, 0.72);
+  font: 400 0.9rem "Press Start 2P", "Courier New", monospace;
+  text-shadow: 0 1px 0 rgba(255, 243, 204, 0.65);
+  cursor: pointer;
+  transition: color 180ms ease, text-shadow 180ms ease, transform 180ms ease;
+}
+
+.exit-dialog__option span {
+  display: inline-block;
+  width: 1.2rem;
+  opacity: 0;
+}
+
+.exit-dialog__option--selected {
+  color: #6d1d12;
+  text-shadow: 0 0 8px rgba(174, 49, 27, 0.45), 0 1px 0 rgba(255, 243, 204, 0.65);
+  transform: translateX(4px);
+}
+
+.exit-dialog__option--selected span {
+  opacity: 1;
+}
+
+.exit-dialog__option:focus-visible {
+  outline: 2px solid #fff1ba;
+  outline-offset: 0.3rem;
+}
+
+.title-screen__exit-fade {
+  position: absolute;
+  z-index: 10;
+  inset: 0;
+  background: #000;
+  animation: exit-fade-to-black 800ms ease-in forwards;
+}
+
+.farewell-screen {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  margin: 0;
+  background: #000;
+  color: #d8c894;
+  font-family: "Pixelify Sans", "Courier New", monospace;
+  text-align: center;
+}
+
+.farewell-screen p {
+  margin: 0;
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 12px rgba(216, 200, 148, 0.22);
+  animation: farewell-appear 900ms ease-out both;
+}
+
 .splash-screen__credit {
   animation: studio-credit 2.6s ease-in-out forwards;
   opacity: 0;
@@ -385,6 +482,40 @@ body,
   }
 }
 
+@keyframes dialog-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dialog-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes exit-fade-to-black {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes farewell-appear {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-height: 44rem) {
   .title-screen__tagline {
     margin-top: 0.75rem;
@@ -422,7 +553,10 @@ body,
   .title-screen__particles span,
   .title-screen__prompt,
   .main-menu__button,
-  .title-screen__content h1 {
+  .title-screen__content h1,
+  .exit-dialog-backdrop,
+  .exit-dialog,
+  .farewell-screen p {
     animation: none;
     opacity: 1;
   }

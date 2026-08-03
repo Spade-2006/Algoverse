@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const menuItems = [
   "New Journey",
@@ -8,7 +8,7 @@ const menuItems = [
   "Exit",
 ];
 
-function MenuButton({ label, isSelected, onKeyDown, onSelect, buttonRef }) {
+function MenuButton({ label, isSelected, onActivate, onKeyDown, onSelect, buttonRef }) {
   return (
     <button
       ref={buttonRef}
@@ -17,6 +17,7 @@ function MenuButton({ label, isSelected, onKeyDown, onSelect, buttonRef }) {
       onFocus={onSelect}
       onMouseEnter={onSelect}
       onKeyDown={onKeyDown}
+      onClick={onActivate}
     >
       <span className="main-menu__indicator" aria-hidden="true">►</span>
       <span>{label}</span>
@@ -24,9 +25,19 @@ function MenuButton({ label, isSelected, onKeyDown, onSelect, buttonRef }) {
   );
 }
 
-function MainMenu() {
+function MainMenu({ onExit, restoreExitFocus, onExitFocusRestored }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const itemRefs = useRef([]);
+
+  useEffect(() => {
+    if (!restoreExitFocus) {
+      return;
+    }
+
+    const exitIndex = menuItems.indexOf("Exit");
+    itemRefs.current[exitIndex]?.focus();
+    onExitFocusRestored();
+  }, [onExitFocusRestored, restoreExitFocus]);
 
   const selectItem = (index, shouldFocus = false) => {
     setSelectedIndex(index);
@@ -54,6 +65,7 @@ function MainMenu() {
           key={item}
           label={item}
           isSelected={selectedIndex === index}
+          onActivate={item === "Exit" ? onExit : undefined}
           onSelect={() => selectItem(index)}
           onKeyDown={(event) => handleKeyDown(event, index)}
           buttonRef={(element) => {

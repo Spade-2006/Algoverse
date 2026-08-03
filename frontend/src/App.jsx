@@ -2,12 +2,17 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import titleScreen from "../../assets/backgrounf/title-screen.png";
 import titleTaglineScroll from "../../assets/ui/title-tagline-scroll-wide.png";
+import ExitConfirmation from "./pages/ExitConfirmation";
 import MainMenu from "./pages/MainMenu";
 
 function App() {
   const [showTitleScreen, setShowTitleScreen] = useState(false);
   const [isPromptVisible, setIsPromptVisible] = useState(true);
   const [showMainMenu, setShowMainMenu] = useState(false);
+  const [isExitDialogOpen, setIsExitDialogOpen] = useState(false);
+  const [shouldFocusExit, setShouldFocusExit] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+  const [showFarewell, setShowFarewell] = useState(false);
 
   useEffect(() => {
     const splashTimer = window.setTimeout(() => {
@@ -29,6 +34,18 @@ function App() {
   }, [isPromptVisible, showTitleScreen]);
 
   useEffect(() => {
+    if (!isFadingOut) {
+      return undefined;
+    }
+
+    const farewellTimer = window.setTimeout(() => {
+      setShowFarewell(true);
+    }, 800);
+
+    return () => window.clearTimeout(farewellTimer);
+  }, [isFadingOut]);
+
+  useEffect(() => {
     if (!showTitleScreen || isPromptVisible) {
       return undefined;
     }
@@ -39,6 +56,14 @@ function App() {
 
     return () => window.clearTimeout(menuTimer);
   }, [isPromptVisible, showTitleScreen]);
+
+  if (showFarewell) {
+    return (
+      <main className="farewell-screen">
+        <p>Until our paths cross again...</p>
+      </main>
+    );
+  }
 
   if (showTitleScreen) {
     return (
@@ -87,8 +112,27 @@ function App() {
             PRESS ANY KEY
           </button>
           {showMainMenu && <div className="title-screen__divider" aria-hidden="true">✦</div>}
-          {showMainMenu && <MainMenu />}
+          {showMainMenu && (
+            <MainMenu
+              onExit={() => setIsExitDialogOpen(true)}
+              restoreExitFocus={shouldFocusExit}
+              onExitFocusRestored={() => setShouldFocusExit(false)}
+            />
+          )}
         </section>
+        {isFadingOut && <div className="title-screen__exit-fade" aria-hidden="true" />}
+        {isExitDialogOpen && (
+          <ExitConfirmation
+            onConfirm={() => {
+              setIsExitDialogOpen(false);
+              setIsFadingOut(true);
+            }}
+            onCancel={() => {
+              setIsExitDialogOpen(false);
+              setShouldFocusExit(true);
+            }}
+          />
+        )}
       </main>
     );
   }
