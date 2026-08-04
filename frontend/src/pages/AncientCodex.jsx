@@ -1,42 +1,27 @@
 import { useEffect, useRef } from "react";
-
-/**
- * Region data — fantasy names only.
- * DSA concepts are intentionally withheld from the UI.
- */
-const REGIONS = [
-  {
-    id: "plains-of-origins",
-    name: "Plains of Origins",
-    lore: "Knowledge yet undiscovered.",
-    locked: true,
-  },
-  {
-    id: "temple-of-echoes",
-    name: "Temple of Echoes",
-    lore: "Knowledge yet undiscovered.",
-    locked: true,
-  },
-  {
-    id: "verdant-arbor",
-    name: "Verdant Arbor",
-    lore: "Knowledge yet undiscovered.",
-    locked: true,
-  },
-];
+import { SaveManager } from "../services/saveManager";
 
 /**
  * AncientCodex
  *
- * Renders a full-screen parchment book overlay on top of the title-screen
- * background. Lists discovered (and locked) regions as codex chapters.
- * Region entries are display-only — no interaction yet.
+ * Renders a full-screen parchment book overlay.
+ * Reused as the single canonical Ancient Codex component across all entry points
+ * (Main Menu and Pause Menu).
+ *
+ * Automatically resolves effective progression state by merging runtime in-memory
+ * state with persisted save data from SaveManager.
  *
  * Props:
- *   onBack – called when the player closes the Codex (Back button or Escape)
+ *   onBack           – called when the player closes the Codex
+ *   progressionState – optional runtime progression flags from an active game session
  */
-function AncientCodex({ onBack }) {
+function AncientCodex({ onBack, progressionState = {} }) {
   const backRef = useRef(null);
+
+  // Unify progression resolution: read saved game data from SaveManager if available
+  const savedProgression = SaveManager.loadGame()?.progression || {};
+  const binaryCodeTrialCompleted = !!(progressionState.binaryCodeTrialCompleted || savedProgression.binaryCodeTrialCompleted);
+  const plainsDiscovered = !!(progressionState.plainsDiscovered || savedProgression.plainsDiscovered);
 
   // Focus the Back button on mount so keyboard users can act immediately
   useEffect(() => {
@@ -48,6 +33,7 @@ function AncientCodex({ onBack }) {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
         event.preventDefault();
+        event.stopPropagation();
         onBack();
       }
     };
@@ -87,6 +73,52 @@ function AncientCodex({ onBack }) {
               ancient arts of order and pattern were first etched into stone and
               sky. Only the worthy may walk these lands.
             </p>
+
+            {/* ── Phase 0 / Dungeon Trial Knowledge ────────── */}
+            {binaryCodeTrialCompleted && (
+              <div className="codex-trial-section">
+                <p className="codex-trial-section__phase">Phase 0 — The Dungeon</p>
+
+                <div className="codex-trial-entry">
+                  <p className="codex-trial-entry__name">Binary Search</p>
+                  <p className="codex-trial-entry__status">⚔ Trial Conquered</p>
+
+                  <p className="codex-trial-entry__label">Core Idea</p>
+                  <p className="codex-trial-entry__body">
+                    Repeatedly reduces the search space by comparing the target
+                    with the middle element of a sorted collection.
+                  </p>
+
+                  <p className="codex-trial-entry__label">Requirement</p>
+                  <p className="codex-trial-entry__body">The collection must be sorted.</p>
+
+                  <p className="codex-trial-entry__label">The Method</p>
+                  <ol className="codex-trial-entry__steps">
+                    <li>Check the middle element.</li>
+                    <li>If it is the target, return its position.</li>
+                    <li>If the target is smaller, search the left half.</li>
+                    <li>If the target is larger, search the right half.</li>
+                    <li>Repeat until found or the space is empty.</li>
+                  </ol>
+
+                  <div className="codex-trial-entry__complexity-row">
+                    <span className="codex-trial-entry__complexity-item">
+                      <span className="codex-trial-entry__complexity-label">Time</span>
+                      <code className="codex-trial-entry__complexity-val">O(log n)</code>
+                    </span>
+                    <span className="codex-trial-entry__complexity-item">
+                      <span className="codex-trial-entry__complexity-label">Space</span>
+                      <code className="codex-trial-entry__complexity-val">O(1)</code>
+                    </span>
+                  </div>
+
+                  <p className="codex-trial-entry__note">
+                    Code Trial completed.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="codex-book__seal" aria-hidden="true">
               <span className="codex-book__seal-ring">✦</span>
             </div>
@@ -116,27 +148,56 @@ function AncientCodex({ onBack }) {
 
             {/* Region entries */}
             <ol className="codex-regions" aria-label="Known regions">
-              {REGIONS.map((region) => (
-                <li
-                  key={region.id}
-                  className={`codex-region${region.locked ? " codex-region--locked" : ""}`}
-                  aria-label={`${region.name}${region.locked ? ", sealed" : ""}`}
-                >
-                  <div className="codex-region__header">
-                    <span className="codex-region__numeral" aria-hidden="true">
-                      {/* Roman numerals via CSS counter */}
+
+              {/* Plains of Origins — unlocked when discovered */}
+              <li
+                className={`codex-region${!plainsDiscovered ? " codex-region--locked" : ""}`}
+                aria-label={`Plains of Origins${!plainsDiscovered ? ", sealed" : ""}`}
+              >
+                <div className="codex-region__header">
+                  <span className="codex-region__numeral" aria-hidden="true" />
+                  <span className="codex-region__name">Plains of Origins</span>
+                  {!plainsDiscovered && (
+                    <span className="codex-region__lock" aria-hidden="true" title="Sealed">
+                      🔒
                     </span>
-                    <span className="codex-region__name">{region.name}</span>
-                    {region.locked && (
-                      <span className="codex-region__lock" aria-hidden="true" title="Sealed">
-                        🔒
-                      </span>
-                    )}
-                  </div>
-                  <p className="codex-region__lore">{region.lore}</p>
-                  <div className="codex-region__rule" aria-hidden="true" />
-                </li>
-              ))}
+                  )}
+                </div>
+                <p className="codex-region__lore">
+                  {plainsDiscovered
+                    ? "An ancient expanse beyond the Grandmaster's Gate. What waits across its forgotten paths remains unknown."
+                    : "Knowledge yet undiscovered."}
+                </p>
+                <div className="codex-region__rule" aria-hidden="true" />
+              </li>
+
+              {/* Future regions — always locked */}
+              <li
+                className="codex-region codex-region--locked"
+                aria-label="Temple of Echoes, sealed"
+              >
+                <div className="codex-region__header">
+                  <span className="codex-region__numeral" aria-hidden="true" />
+                  <span className="codex-region__name">Temple of Echoes</span>
+                  <span className="codex-region__lock" aria-hidden="true" title="Sealed">🔒</span>
+                </div>
+                <p className="codex-region__lore">Knowledge yet undiscovered.</p>
+                <div className="codex-region__rule" aria-hidden="true" />
+              </li>
+
+              <li
+                className="codex-region codex-region--locked"
+                aria-label="Verdant Arbor, sealed"
+              >
+                <div className="codex-region__header">
+                  <span className="codex-region__numeral" aria-hidden="true" />
+                  <span className="codex-region__name">Verdant Arbor</span>
+                  <span className="codex-region__lock" aria-hidden="true" title="Sealed">🔒</span>
+                </div>
+                <p className="codex-region__lore">Knowledge yet undiscovered.</p>
+                <div className="codex-region__rule" aria-hidden="true" />
+              </li>
+
             </ol>
 
             {/* Back */}

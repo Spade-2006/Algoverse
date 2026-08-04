@@ -1,38 +1,45 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+const DEFAULT_MASTER_VOLUME = 70;
 const DEFAULT_MUSIC_VOLUME = 70;
 const DEFAULT_SFX_VOLUME = 70;
 
 /**
  * SettingsPanel
  *
- * Renders over the existing title-screen background.
- * Contains Music Volume, SFX Volume sliders (0–100) and a Back option.
- * No audio playback is wired – state is kept for future use.
+ * Renders over the Title Screen or inside the Pause Menu.
+ * Contains Master Volume, Music Volume, SFX Volume sliders (0–100) and a Back option.
  *
  * Props:
- *   onBack        – called when the player closes Settings (Back or Escape)
- *   musicVolume   – current music volume (controlled from App)
- *   sfxVolume     – current SFX volume (controlled from App)
- *   onMusicChange – (value: number) => void
- *   onSfxChange   – (value: number) => void
+ *   onBack          – called when the player closes Settings (Back or Escape)
+ *   masterVolume    – current master volume
+ *   musicVolume     – current music volume
+ *   sfxVolume       – current SFX volume
+ *   onMasterChange  – (value: number) => void
+ *   onMusicChange   – (value: number) => void
+ *   onSfxChange     – (value: number) => void
  */
-function SettingsPanel({ onBack, musicVolume, sfxVolume, onMusicChange, onSfxChange }) {
-  // "back" is the third focusable row (index 2)
+function SettingsPanel({
+  onBack,
+  masterVolume = DEFAULT_MASTER_VOLUME,
+  musicVolume = DEFAULT_MUSIC_VOLUME,
+  sfxVolume = DEFAULT_SFX_VOLUME,
+  onMasterChange,
+  onMusicChange,
+  onSfxChange,
+}) {
+  // Row 0: Master, Row 1: Music, Row 2: SFX, Row 3: Back
   const [selectedIndex, setSelectedIndex] = useState(0);
   const rowRefs = useRef([]);
 
-  // Focus the currently selected row on mount and when selection changes via keyboard
   const focusRow = useCallback((index) => {
     rowRefs.current[index]?.focus();
   }, []);
 
-  // Auto-focus first row on open
   useEffect(() => {
     focusRow(0);
   }, [focusRow]);
 
-  // Global keyboard handler
   useEffect(() => {
     const handleKeyDown = (event) => {
       switch (event.key) {
@@ -44,7 +51,7 @@ function SettingsPanel({ onBack, musicVolume, sfxVolume, onMusicChange, onSfxCha
         case "ArrowDown":
           event.preventDefault();
           setSelectedIndex((prev) => {
-            const next = (prev + 1) % 3;
+            const next = (prev + 1) % 4;
             focusRow(next);
             return next;
           });
@@ -53,7 +60,7 @@ function SettingsPanel({ onBack, musicVolume, sfxVolume, onMusicChange, onSfxCha
         case "ArrowUp":
           event.preventDefault();
           setSelectedIndex((prev) => {
-            const next = (prev - 1 + 3) % 3;
+            const next = (prev - 1 + 4) % 4;
             focusRow(next);
             return next;
           });
@@ -61,30 +68,30 @@ function SettingsPanel({ onBack, musicVolume, sfxVolume, onMusicChange, onSfxCha
 
         case "Enter":
         case " ":
-          // Activate Back if it is selected
-          if (selectedIndex === 2) {
+          if (selectedIndex === 3) {
             event.preventDefault();
             onBack();
           }
-          // Sliders (index 0 and 1) handle their own Enter/Space natively
           break;
 
         case "ArrowLeft":
-          if (selectedIndex === 0) {
-            event.preventDefault();
+          event.preventDefault();
+          if (selectedIndex === 0 && onMasterChange) {
+            onMasterChange(Math.max(0, masterVolume - 5));
+          } else if (selectedIndex === 1 && onMusicChange) {
             onMusicChange(Math.max(0, musicVolume - 5));
-          } else if (selectedIndex === 1) {
-            event.preventDefault();
+          } else if (selectedIndex === 2 && onSfxChange) {
             onSfxChange(Math.max(0, sfxVolume - 5));
           }
           break;
 
         case "ArrowRight":
-          if (selectedIndex === 0) {
-            event.preventDefault();
+          event.preventDefault();
+          if (selectedIndex === 0 && onMasterChange) {
+            onMasterChange(Math.min(100, masterVolume + 5));
+          } else if (selectedIndex === 1 && onMusicChange) {
             onMusicChange(Math.min(100, musicVolume + 5));
-          } else if (selectedIndex === 1) {
-            event.preventDefault();
+          } else if (selectedIndex === 2 && onSfxChange) {
             onSfxChange(Math.min(100, sfxVolume + 5));
           }
           break;
@@ -96,7 +103,7 @@ function SettingsPanel({ onBack, musicVolume, sfxVolume, onMusicChange, onSfxCha
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [focusRow, musicVolume, onBack, onMusicChange, onSfxChange, selectedIndex, sfxVolume]);
+  }, [focusRow, masterVolume, musicVolume, onBack, onMasterChange, onMusicChange, onSfxChange, selectedIndex, sfxVolume]);
 
   const selectRow = (index) => {
     setSelectedIndex(index);
@@ -115,10 +122,40 @@ function SettingsPanel({ onBack, musicVolume, sfxVolume, onMusicChange, onSfxCha
         </h2>
 
         <div className="settings-panel__rows">
-          {/* ── Music Volume ── */}
+          {/* ── Master Volume ── */}
           <div
             className={`settings-panel__row${selectedIndex === 0 ? " settings-panel__row--selected" : ""}`}
             onMouseEnter={() => selectRow(0)}
+          >
+            <label htmlFor="settings-master-volume" className="settings-panel__label">
+              <span className="settings-panel__indicator" aria-hidden="true">►</span>
+              Master Volume
+            </label>
+            <div className="settings-panel__slider-group">
+              <input
+                ref={(el) => { rowRefs.current[0] = el; }}
+                id="settings-master-volume"
+                type="range"
+                min="0"
+                max="100"
+                value={masterVolume}
+                className="settings-panel__slider"
+                aria-valuenow={masterVolume}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                onFocus={() => selectRow(0)}
+                onChange={(event) => onMasterChange && onMasterChange(Number(event.target.value))}
+              />
+              <span className="settings-panel__value" aria-live="polite">
+                {masterVolume}
+              </span>
+            </div>
+          </div>
+
+          {/* ── Music Volume ── */}
+          <div
+            className={`settings-panel__row${selectedIndex === 1 ? " settings-panel__row--selected" : ""}`}
+            onMouseEnter={() => selectRow(1)}
           >
             <label htmlFor="settings-music-volume" className="settings-panel__label">
               <span className="settings-panel__indicator" aria-hidden="true">►</span>
@@ -126,7 +163,7 @@ function SettingsPanel({ onBack, musicVolume, sfxVolume, onMusicChange, onSfxCha
             </label>
             <div className="settings-panel__slider-group">
               <input
-                ref={(el) => { rowRefs.current[0] = el; }}
+                ref={(el) => { rowRefs.current[1] = el; }}
                 id="settings-music-volume"
                 type="range"
                 min="0"
@@ -136,8 +173,8 @@ function SettingsPanel({ onBack, musicVolume, sfxVolume, onMusicChange, onSfxCha
                 aria-valuenow={musicVolume}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                onFocus={() => selectRow(0)}
-                onChange={(event) => onMusicChange(Number(event.target.value))}
+                onFocus={() => selectRow(1)}
+                onChange={(event) => onMusicChange && onMusicChange(Number(event.target.value))}
               />
               <span className="settings-panel__value" aria-live="polite">
                 {musicVolume}
@@ -147,8 +184,8 @@ function SettingsPanel({ onBack, musicVolume, sfxVolume, onMusicChange, onSfxCha
 
           {/* ── SFX Volume ── */}
           <div
-            className={`settings-panel__row${selectedIndex === 1 ? " settings-panel__row--selected" : ""}`}
-            onMouseEnter={() => selectRow(1)}
+            className={`settings-panel__row${selectedIndex === 2 ? " settings-panel__row--selected" : ""}`}
+            onMouseEnter={() => selectRow(2)}
           >
             <label htmlFor="settings-sfx-volume" className="settings-panel__label">
               <span className="settings-panel__indicator" aria-hidden="true">►</span>
@@ -156,7 +193,7 @@ function SettingsPanel({ onBack, musicVolume, sfxVolume, onMusicChange, onSfxCha
             </label>
             <div className="settings-panel__slider-group">
               <input
-                ref={(el) => { rowRefs.current[1] = el; }}
+                ref={(el) => { rowRefs.current[2] = el; }}
                 id="settings-sfx-volume"
                 type="range"
                 min="0"
@@ -166,8 +203,8 @@ function SettingsPanel({ onBack, musicVolume, sfxVolume, onMusicChange, onSfxCha
                 aria-valuenow={sfxVolume}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                onFocus={() => selectRow(1)}
-                onChange={(event) => onSfxChange(Number(event.target.value))}
+                onFocus={() => selectRow(2)}
+                onChange={(event) => onSfxChange && onSfxChange(Number(event.target.value))}
               />
               <span className="settings-panel__value" aria-live="polite">
                 {sfxVolume}
@@ -177,14 +214,14 @@ function SettingsPanel({ onBack, musicVolume, sfxVolume, onMusicChange, onSfxCha
 
           {/* ── Back ── */}
           <div
-            className={`settings-panel__row settings-panel__row--back${selectedIndex === 2 ? " settings-panel__row--selected" : ""}`}
-            onMouseEnter={() => selectRow(2)}
+            className={`settings-panel__row settings-panel__row--back${selectedIndex === 3 ? " settings-panel__row--selected" : ""}`}
+            onMouseEnter={() => selectRow(3)}
           >
             <button
-              ref={(el) => { rowRefs.current[2] = el; }}
+              ref={(el) => { rowRefs.current[3] = el; }}
               type="button"
               className="settings-panel__back-btn"
-              onFocus={() => selectRow(2)}
+              onFocus={() => selectRow(3)}
               onClick={onBack}
             >
               <span className="settings-panel__indicator" aria-hidden="true">►</span>
@@ -197,5 +234,5 @@ function SettingsPanel({ onBack, musicVolume, sfxVolume, onMusicChange, onSfxCha
   );
 }
 
-export { DEFAULT_MUSIC_VOLUME, DEFAULT_SFX_VOLUME };
+export { DEFAULT_MASTER_VOLUME, DEFAULT_MUSIC_VOLUME, DEFAULT_SFX_VOLUME };
 export default SettingsPanel;

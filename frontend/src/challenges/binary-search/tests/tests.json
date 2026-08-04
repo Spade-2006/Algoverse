@@ -1,0 +1,67 @@
+{
+  "_security_architecture_note": "CRITICAL ARCHITECTURE NOTE: Tests stored in frontend source are challenge-development data and not genuinely secret. When the backend execution engine is implemented, true hidden tests must be evaluated server-side and include dynamically generated randomized test vectors.",
+  "visible": [
+    {
+      "id": "visible-1",
+      "name": "Target in middle",
+      "input": { "arr": [1, 3, 5, 7, 9], "target": 5 },
+      "expected": 2
+    },
+    {
+      "id": "visible-2",
+      "name": "Target absent",
+      "input": { "arr": [1, 3, 5, 7, 9], "target": 4 },
+      "expected": -1
+    },
+    {
+      "id": "visible-3",
+      "name": "Single-element array",
+      "input": { "arr": [42], "target": 42 },
+      "expected": 0
+    }
+  ],
+  "hidden": [
+    {
+      "id": "hidden-1",
+      "name": "Target at first index",
+      "input": { "arr": [10, 20, 30, 40, 50], "target": 10 },
+      "expected": 0
+    },
+    {
+      "id": "hidden-2",
+      "name": "Target at last index",
+      "input": { "arr": [10, 20, 30, 40, 50], "target": 50 },
+      "expected": 4
+    },
+    {
+      "id": "hidden-3",
+      "name": "Empty array",
+      "input": { "arr": [], "target": 5 },
+      "expected": -1
+    },
+    {
+      "id": "hidden-4",
+      "name": "Two-element array",
+      "input": { "arr": [15, 25], "target": 25 },
+      "expected": 1
+    },
+    {
+      "id": "hidden-5",
+      "name": "Negative values",
+      "input": { "arr": [-50, -30, -10, 0, 20, 40], "target": -30 },
+      "expected": 1
+    },
+    {
+      "id": "hidden-6",
+      "name": "Target between existing values but absent",
+      "input": { "arr": [2, 4, 6, 8, 10, 12], "target": 7 },
+      "expected": -1
+    },
+    {
+      "id": "hidden-7",
+      "name": "Larger sorted array",
+      "input": { "arr": [3, 8, 12, 17, 24, 29, 31, 35, 42, 48, 56, 61, 73, 85, 99], "target": 73 },
+      "expected": 12
+    }
+  ]
+}

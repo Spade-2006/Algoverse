@@ -1,0 +1,17 @@
+{
+  "id": "binary-search",
+  "title": "Binary Search",
+  "domain": "THE DIVIDED PATH",
+  "functionName": "search",
+  "timeComplexity": "O(log n)",
+  "spaceComplexity": "O(1)",
+  "description": "Given a sorted array of integers and a target value, return the index of the target. If the target does not exist, return -1.",
+  "inputSignature": [
+    { "name": "arr", "type": "array<integer>" },
+    { "name": "target", "type": "integer" }
+  ],
+  "outputSignature": {
+    "type": "integer"
+  },
+  "notes": "Arrays contain unique integers sorted in ascending order."
+}

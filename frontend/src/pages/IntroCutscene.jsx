@@ -215,11 +215,13 @@ function IntroCutscene({ onComplete }) {
       if (showConfirm) {
         if (e.key === "Escape") {
           e.preventDefault();
+          e.stopPropagation();
           cancelConfirm();
           return;
         }
         if (e.key === "Enter") {
           e.preventDefault();
+          e.stopPropagation();
           if (confirmChoice === "yes") executeSkip();
           else cancelConfirm();
           return;
@@ -238,8 +240,10 @@ function IntroCutscene({ onComplete }) {
       }
 
       // --- Confirmation is CLOSED ---
-      if (e.key === "Escape") {
+      // Dedicated cutscene skip key is now SPACE
+      if (e.key === " " || e.code === "Space" || e.key === "Spacebar") {
         e.preventDefault();
+        e.stopPropagation();
         openConfirm();
       }
     };
@@ -414,11 +418,11 @@ function IntroCutscene({ onComplete }) {
           id="cutscene-skip-btn"
           className="cutscene__skip-btn"
           type="button"
-          aria-label="Skip intro cutscene"
+          aria-label="Skip intro cutscene with spacebar"
           onClick={openConfirm}
           tabIndex={showConfirm ? -1 : 0}
         >
-          SKIP&nbsp;&nbsp;<span className="cutscene__skip-key">[ESC]</span>
+          SKIP&nbsp;&nbsp;<span className="cutscene__skip-key">[SPACE]</span>
         </button>
       )}
 
