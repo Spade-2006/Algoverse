@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import titleScreen from "../../assets/backgrounf/title-screen.png";
+import titleScreen from "../../assets/background/title-screen.png";
 import titleTaglineScroll from "../../assets/ui/title-tagline-scroll-wide.png";
+import AncientCodex from "./pages/AncientCodex";
 import ExitConfirmation from "./pages/ExitConfirmation";
+import GameScreen from "./pages/GameScreen";
+import IntroCutscene from "./pages/IntroCutscene";
 import MainMenu from "./pages/MainMenu";
+import SettingsPanel, { DEFAULT_MUSIC_VOLUME, DEFAULT_SFX_VOLUME } from "./pages/SettingsPanel";
 
 function App() {
   const [showTitleScreen, setShowTitleScreen] = useState(false);
@@ -13,6 +17,15 @@ function App() {
   const [shouldFocusExit, setShouldFocusExit] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [showFarewell, setShowFarewell] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [shouldFocusSettings, setShouldFocusSettings] = useState(false);
+  const [isCodexOpen, setIsCodexOpen] = useState(false);
+  const [shouldFocusCodex, setShouldFocusCodex] = useState(false);
+  const [isJourneyFading, setIsJourneyFading] = useState(false);
+  const [showIntroCutscene, setShowIntroCutscene] = useState(false);
+  const [showGameScreen, setShowGameScreen] = useState(false);
+  const [musicVolume, setMusicVolume] = useState(DEFAULT_MUSIC_VOLUME);
+  const [sfxVolume, setSfxVolume] = useState(DEFAULT_SFX_VOLUME);
 
   useEffect(() => {
     const splashTimer = window.setTimeout(() => {
@@ -45,6 +58,19 @@ function App() {
     return () => window.clearTimeout(farewellTimer);
   }, [isFadingOut]);
 
+  // After the journey-fade overlay reaches black, swap to the cutscene screen
+  useEffect(() => {
+    if (!isJourneyFading) {
+      return undefined;
+    }
+
+    const journeyTimer = window.setTimeout(() => {
+      setShowIntroCutscene(true);
+    }, 800);
+
+    return () => window.clearTimeout(journeyTimer);
+  }, [isJourneyFading]);
+
   useEffect(() => {
     if (!showTitleScreen || isPromptVisible) {
       return undefined;
@@ -62,6 +88,23 @@ function App() {
       <main className="farewell-screen">
         <p>Until our paths cross again...</p>
       </main>
+    );
+  }
+
+  // ── Phaser Gameplay Screen (replaces cutscene) ──
+  if (showGameScreen) {
+    return <GameScreen />;
+  }
+
+  // ── Intro Cutscene screen (replaces title screen entirely) ──
+  if (showIntroCutscene) {
+    return (
+      <IntroCutscene
+        onComplete={() => {
+          setShowIntroCutscene(false);
+          setShowGameScreen(true);
+        }}
+      />
     );
   }
 
@@ -117,10 +160,17 @@ function App() {
               onExit={() => setIsExitDialogOpen(true)}
               restoreExitFocus={shouldFocusExit}
               onExitFocusRestored={() => setShouldFocusExit(false)}
+              onSettings={() => setIsSettingsOpen(true)}
+              restoreSettingsFocus={shouldFocusSettings}
+              onSettingsFocusRestored={() => setShouldFocusSettings(false)}
+              onCodex={() => setIsCodexOpen(true)}
+              restoreCodexFocus={shouldFocusCodex}
+              onCodexFocusRestored={() => setShouldFocusCodex(false)}
+              onNewJourney={() => setIsJourneyFading(true)}
             />
           )}
         </section>
-        {isFadingOut && <div className="title-screen__exit-fade" aria-hidden="true" />}
+        {(isFadingOut || isJourneyFading) && <div className="title-screen__exit-fade" aria-hidden="true" />}
         {isExitDialogOpen && (
           <ExitConfirmation
             onConfirm={() => {
@@ -130,6 +180,26 @@ function App() {
             onCancel={() => {
               setIsExitDialogOpen(false);
               setShouldFocusExit(true);
+            }}
+          />
+        )}
+        {isSettingsOpen && (
+          <SettingsPanel
+            musicVolume={musicVolume}
+            sfxVolume={sfxVolume}
+            onMusicChange={setMusicVolume}
+            onSfxChange={setSfxVolume}
+            onBack={() => {
+              setIsSettingsOpen(false);
+              setShouldFocusSettings(true);
+            }}
+          />
+        )}
+        {isCodexOpen && (
+          <AncientCodex
+            onBack={() => {
+              setIsCodexOpen(false);
+              setShouldFocusCodex(true);
             }}
           />
         )}

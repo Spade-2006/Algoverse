@@ -25,7 +25,7 @@ function MenuButton({ label, isSelected, onActivate, onKeyDown, onSelect, button
   );
 }
 
-function MainMenu({ onExit, restoreExitFocus, onExitFocusRestored }) {
+function MainMenu({ onExit, restoreExitFocus, onExitFocusRestored, onSettings, restoreSettingsFocus, onSettingsFocusRestored, onCodex, restoreCodexFocus, onCodexFocusRestored, onNewJourney }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const itemRefs = useRef([]);
 
@@ -38,6 +38,26 @@ function MainMenu({ onExit, restoreExitFocus, onExitFocusRestored }) {
     itemRefs.current[exitIndex]?.focus();
     onExitFocusRestored();
   }, [onExitFocusRestored, restoreExitFocus]);
+
+  useEffect(() => {
+    if (!restoreSettingsFocus) {
+      return;
+    }
+
+    const settingsIndex = menuItems.indexOf("Settings");
+    itemRefs.current[settingsIndex]?.focus();
+    onSettingsFocusRestored();
+  }, [onSettingsFocusRestored, restoreSettingsFocus]);
+
+  useEffect(() => {
+    if (!restoreCodexFocus) {
+      return;
+    }
+
+    const codexIndex = menuItems.indexOf("Ancient Codex");
+    itemRefs.current[codexIndex]?.focus();
+    onCodexFocusRestored();
+  }, [onCodexFocusRestored, restoreCodexFocus]);
 
   const selectItem = (index, shouldFocus = false) => {
     setSelectedIndex(index);
@@ -65,7 +85,13 @@ function MainMenu({ onExit, restoreExitFocus, onExitFocusRestored }) {
           key={item}
           label={item}
           isSelected={selectedIndex === index}
-          onActivate={item === "Exit" ? onExit : undefined}
+          onActivate={
+            item === "Exit" ? onExit
+            : item === "Settings" ? onSettings
+            : item === "Ancient Codex" ? onCodex
+            : item === "New Journey" ? onNewJourney
+            : undefined
+          }
           onSelect={() => selectItem(index)}
           onKeyDown={(event) => handleKeyDown(event, index)}
           buttonRef={(element) => {
