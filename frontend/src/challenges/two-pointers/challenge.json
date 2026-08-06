@@ -1,0 +1,17 @@
+{
+  "id": "two-pointers",
+  "title": "Two Pointers — Resonance Pair",
+  "domain": "PLAINS OF ORIGINS",
+  "functionName": "findResonancePair",
+  "timeComplexity": "O(n)",
+  "spaceComplexity": "O(1)",
+  "description": "Given a sorted array of integer frequencies and a target frequency, find the two values whose sum equals target using the Two Pointer technique. Return an array containing the two values [val1, val2]. If no pair exists, return an empty array [].",
+  "inputSignature": [
+    { "name": "frequencies", "type": "array<integer>" },
+    { "name": "target", "type": "integer" }
+  ],
+  "outputSignature": {
+    "type": "array<integer>"
+  },
+  "notes": "The array of frequencies is sorted in ascending order. You must use two pointers starting at opposite ends."
+}

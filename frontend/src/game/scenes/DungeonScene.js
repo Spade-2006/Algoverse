@@ -1101,7 +1101,6 @@ export default class DungeonScene extends Phaser.Scene {
   }
 
   unlockGate(options = {}) {
-    if (this.gateUnlocked) return;
     this.gateUnlocked = true;
 
     // Re-enable the dungeon-exit interactable as the walkthrough trigger
@@ -1174,15 +1173,13 @@ export default class DungeonScene extends Phaser.Scene {
       this.currentAnim = null;
     }
 
-    // Fade to black
-    this.cameras.main.fadeOut(800, 0, 0, 0);
+    if (this.promptTextUI) this.promptTextUI.setVisible(false);
 
-    // After fade-out completes, hold ~2 seconds then launch Plains scene
+    // Fade to black and start PlainsOfOriginsScene immediately upon fadeout completion
+    this.cameras.main.fadeOut(800, 0, 0, 0);
     this.cameras.main.once("camerafadeoutcomplete", () => {
-      this.time.delayedCall(2000, () => {
-        gameEvents.emit("progression-update", { plainsDiscovered: true });
-        this.scene.start("PlainsOfOriginsScene");
-      });
+      gameEvents.emit("progression-update", { plainsDiscovered: true });
+      this.scene.start("PlainsOfOriginsScene");
     });
   }
 

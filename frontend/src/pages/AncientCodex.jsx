@@ -22,6 +22,12 @@ function AncientCodex({ onBack, progressionState = {} }) {
   const savedProgression = SaveManager.loadGame()?.progression || {};
   const binaryCodeTrialCompleted = !!(progressionState.binaryCodeTrialCompleted || savedProgression.binaryCodeTrialCompleted);
   const plainsDiscovered = !!(progressionState.plainsDiscovered || savedProgression.plainsDiscovered);
+  const twoPointersUnlocked = !!(
+    progressionState.twoPointersUnlocked ||
+    progressionState.quest1Solved ||
+    savedProgression.twoPointersUnlocked ||
+    savedProgression.quest1Solved
+  );
 
   // Focus the Back button on mount so keyboard users can act immediately
   useEffect(() => {
@@ -168,6 +174,49 @@ function AncientCodex({ onBack, progressionState = {} }) {
                     ? "An ancient expanse beyond the Grandmaster's Gate. What waits across its forgotten paths remains unknown."
                     : "Knowledge yet undiscovered."}
                 </p>
+
+                {/* Two Pointers Entry — unlocked upon Quest 1 Code Trial completion */}
+                {twoPointersUnlocked && (
+                  <div className="codex-trial-entry" style={{ marginTop: "12px" }}>
+                    <p className="codex-trial-entry__name">Two Pointers</p>
+                    <p className="codex-trial-entry__status">⚔ Trial Conquered</p>
+
+                    <p className="codex-trial-entry__label">Core Idea</p>
+                    <p className="codex-trial-entry__body">
+                      Uses two pointers (`left` and `right`) traversing a sorted collection from opposite ends to find a target pair without checking every pair.
+                    </p>
+
+                    <p className="codex-trial-entry__label">When Useful</p>
+                    <p className="codex-trial-entry__body">
+                      Searching pairs or sub-ranges in sorted arrays with linear time O(n).
+                    </p>
+
+                    <p className="codex-trial-entry__label">The Method</p>
+                    <ol className="codex-trial-entry__steps">
+                      <li>Place `left` at start (0) and `right` at end (N-1).</li>
+                      <li>Compute current sum = `arr[left] + arr[right]`.</li>
+                      <li>If sum equals target, pair found.</li>
+                      <li>If sum &lt; target, move `left` forward.</li>
+                      <li>If sum &gt; target, move `right` backward.</li>
+                    </ol>
+
+                    <div className="codex-trial-entry__complexity-row">
+                      <span className="codex-trial-entry__complexity-item">
+                        <span className="codex-trial-entry__complexity-label">Time</span>
+                        <code className="codex-trial-entry__complexity-val">O(n)</code>
+                      </span>
+                      <span className="codex-trial-entry__complexity-item">
+                        <span className="codex-trial-entry__complexity-label">Space</span>
+                        <code className="codex-trial-entry__complexity-val">O(1)</code>
+                      </span>
+                    </div>
+
+                    <p className="codex-trial-entry__note">
+                      Code Trial completed in Plains of Origins.
+                    </p>
+                  </div>
+                )}
+
                 <div className="codex-region__rule" aria-hidden="true" />
               </li>
 

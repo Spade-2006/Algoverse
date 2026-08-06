@@ -1,0 +1,73 @@
+{
+  "_security_architecture_note": "Server-side test cases for Quest 1 Two Pointers Resonance Pair challenge",
+  "visible": [
+    {
+      "id": "visible-1",
+      "name": "Standard negative/positive pair",
+      "input": { "frequencies": [-67, -42, -18, 5, 31, 76], "target": 9 },
+      "expected": [-67, 76]
+    },
+    {
+      "id": "visible-2",
+      "name": "Positive pair found",
+      "input": { "frequencies": [-10, -4, 1, 3, 8, 15], "target": 11 },
+      "expected": [-4, 15]
+    },
+    {
+      "id": "visible-3",
+      "name": "Inner pair found",
+      "input": { "frequencies": [1, 2, 4, 7, 11], "target": 15 },
+      "expected": [4, 11]
+    },
+    {
+      "id": "visible-4",
+      "name": "Negative target sum",
+      "input": { "frequencies": [-8, -3, 0, 2, 5, 9], "target": -3 },
+      "expected": [-8, 5]
+    },
+    {
+      "id": "visible-5",
+      "name": "No pair exists",
+      "input": { "frequencies": [1, 3, 5, 7], "target": 100 },
+      "expected": []
+    }
+  ],
+  "hidden": [
+    {
+      "id": "hidden-1",
+      "name": "Adjacent pair at start",
+      "input": { "frequencies": [-96, -32, 10, 40, 80], "target": -128 },
+      "expected": [-96, -32]
+    },
+    {
+      "id": "hidden-2",
+      "name": "Adjacent pair at end",
+      "input": { "frequencies": [5, 15, 25, 60, 64], "target": 124 },
+      "expected": [60, 64]
+    },
+    {
+      "id": "hidden-3",
+      "name": "Target less than smallest possible sum",
+      "input": { "frequencies": [10, 20, 30, 40], "target": 5 },
+      "expected": []
+    },
+    {
+      "id": "hidden-4",
+      "name": "Target greater than largest possible sum",
+      "input": { "frequencies": [10, 20, 30, 40], "target": 100 },
+      "expected": []
+    },
+    {
+      "id": "hidden-5",
+      "name": "Negative and positive numbers pair to zero",
+      "input": { "frequencies": [-45, -20, 0, 20, 50], "target": 0 },
+      "expected": [-20, 20]
+    },
+    {
+      "id": "hidden-6",
+      "name": "Large sorted list with target near center",
+      "input": { "frequencies": [-200, -150, -96, -50, 0, 40, 64, 120, 180], "target": -32 },
+      "expected": [-96, 64]
+    }
+  ]
+}

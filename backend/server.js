@@ -137,7 +137,7 @@ const server = http.createServer(async (req, res) => {
         const allTests     = [...visibleTests, ...hiddenTests];
 
         // Construct language test harness
-        const harnessCode = buildHarness(language, sourceCode, allTests);
+        const harnessCode = buildHarness(language, sourceCode, allTests, challengeId);
 
         // Execute via remote sandboxed execution service
         const execResult = await executeCode({ language, sourceCode: harnessCode });
@@ -147,6 +147,17 @@ const server = http.createServer(async (req, res) => {
           res.end(JSON.stringify({
             isConfigured: false,
             message: execResult.message || "Code execution service is not configured.",
+          }));
+          return;
+        }
+
+        if (execResult.error) {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({
+            isConfigured: true,
+            status: "EXECUTION_ERROR",
+            errorTitle: "EXECUTION SERVICE OFFLINE",
+            errorMessage: `${execResult.error}\nMake sure Judge0 is running on http://localhost:2358`,
           }));
           return;
         }
@@ -190,14 +201,21 @@ const server = http.createServer(async (req, res) => {
         const hiddenResults  = [];
 
         allTests.forEach((t, i) => {
-          const regex = new RegExp(`(?:ALGOVERSE_TEST_RESULT:|\\\[ALGOVERSE_TEST_RESULT:)${i}[\\]:]\\s*(-?\\d+)`);
+          // Match: [ALGOVERSE_TEST_RESULT:N] <value>
+          // The [ and ] must be escaped for RegExp; capture everything until end-of-line
+          const regex = new RegExp(`\\[ALGOVERSE_TEST_RESULT:${i}\\]\\s*(.+)`);
           const match = stdout.match(regex);
           let received = null;
           let passed   = false;
 
           if (match) {
-            received = parseInt(match[1], 10);
-            passed   = received === t.expected;
+            const rawStr = match[1].trim();
+            try {
+              received = JSON.parse(rawStr);
+            } catch {
+              received = isNaN(rawStr) ? rawStr : Number(rawStr);
+            }
+            passed = JSON.stringify(received) === JSON.stringify(t.expected);
           }
 
           if (i < visibleTests.length) {

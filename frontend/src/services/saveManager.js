@@ -36,6 +36,8 @@ export const SaveManager = {
           grandmasterPostTrialDone:     !!progressionState.grandmasterPostTrialDone,
           gateUnlocked:                 !!progressionState.gateUnlocked,
           plainsDiscovered:             !!progressionState.plainsDiscovered,
+          quest1Discovered:             !!progressionState.quest1Discovered,
+          quest1Data:                   progressionState.quest1Data || null,
         },
 
         world: {

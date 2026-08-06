@@ -76,11 +76,60 @@ export default function CodeTrialOverlay({ challengeId = "binary-search", onClos
     setExecutionResult(null);
   };
 
+  const runJsClientFallback = (sourceCode) => {
+    try {
+      const visibleResults = challenge.visibleTests.map((t) => {
+        let recVal;
+        let passVal;
+        try {
+          const inputData = t.input.frequencies || t.input.arr;
+          const fn = Function(
+            "frequencies",
+            "arr",
+            "target",
+            `${sourceCode}\n if (typeof findResonancePair === "function") return findResonancePair(frequencies || arr, target); if (typeof Solution === "function" && new Solution().findResonancePair) return new Solution().findResonancePair(frequencies || arr, target); if (typeof search === "function") return search(arr || frequencies, target); return -1;`
+          );
+          recVal = fn(inputData, inputData, t.input.target);
+          passVal = JSON.stringify(recVal) === JSON.stringify(t.expected);
+        } catch (e) {
+          recVal = e.message;
+          passVal = false;
+        }
+        return {
+          id: t.id,
+          name: t.name,
+          input: t.input,
+          expected: t.expected,
+          received: recVal,
+          passed: passVal,
+        };
+      });
+
+      const allPassed = visibleResults.length > 0 && visibleResults.every((r) => r.passed);
+      return {
+        isConfigured: true,
+        status: allPassed ? "ALL_PASSED" : "TESTS_FAILED",
+        allPassed,
+        visibleResults,
+        hiddenResults: [],
+      };
+    } catch (e) {
+      return {
+        isConfigured: true,
+        status: "RUNTIME_ERROR",
+        errorTitle: "EXECUTION ERROR",
+        errorMessage: e.message,
+      };
+    }
+  };
+
   const handleRunTests = async () => {
     if (isRunning) return;
 
     setIsRunning(true);
     setExecutionResult(null);
+
+    const sourceCode = drafts[selectedLanguage];
 
     try {
       const response = await fetch("/api/code/run", {
@@ -89,11 +138,21 @@ export default function CodeTrialOverlay({ challengeId = "binary-search", onClos
         body: JSON.stringify({
           challengeId: challenge.id,
           language: selectedLanguage,
-          sourceCode: drafts[selectedLanguage],
+          sourceCode,
         }),
       });
 
       if (!response.ok) {
+        // Fallback for JS client-side evaluation if backend API is unreachable or returned error
+        if (selectedLanguage === "javascript") {
+          const fallbackRes = runJsClientFallback(sourceCode);
+          setExecutionResult(fallbackRes);
+          if (fallbackRes.allPassed) {
+            gameEvents.emit("code-trial-passed", { challengeId: challenge.id });
+          }
+          return;
+        }
+
         const errorData = await response.json().catch(() => ({}));
         setExecutionResult({
           isConfigured: true,
@@ -111,6 +170,15 @@ export default function CodeTrialOverlay({ challengeId = "binary-search", onClos
         gameEvents.emit("code-trial-passed", { challengeId: challenge.id });
       }
     } catch (err) {
+      if (selectedLanguage === "javascript") {
+        const fallbackRes = runJsClientFallback(sourceCode);
+        setExecutionResult(fallbackRes);
+        if (fallbackRes.allPassed) {
+          gameEvents.emit("code-trial-passed", { challengeId: challenge.id });
+        }
+        return;
+      }
+
       setExecutionResult({
         isConfigured: true,
         status: "RUNTIME_ERROR",

@@ -1,5 +1,7 @@
 import binarySearchMeta from "./binary-search/challenge.json";
 import binarySearchTests from "./binary-search/tests/tests.json";
+import twoPointersMeta from "./two-pointers/challenge.json";
+import twoPointersTests from "./two-pointers/tests/tests.json";
 
 const CHALLENGE_REGISTRY = {
   "binary-search": {
@@ -10,6 +12,16 @@ const CHALLENGE_REGISTRY = {
       java: `static int search(int[] arr, int target) {\n    // Write your solution\n}`,
       python: `def search(arr, target):\n    # Write your solution\n    pass`,
       javascript: `function search(arr, target) {\n    // Write your solution\n}`,
+    },
+  },
+  "two-pointers": {
+    meta: twoPointersMeta,
+    tests: twoPointersTests,
+    starters: {
+      cpp: `vector<int> findResonancePair(const vector<int>& frequencies, int target) {\n    // Write your Two Pointer solution here\n    \n}`,
+      java: `static int[] findResonancePair(int[] frequencies, int target) {\n    // Write your Two Pointer solution here\n    \n}`,
+      python: `def findResonancePair(frequencies, target):\n    # Write your Two Pointer solution here\n    pass`,
+      javascript: `function findResonancePair(frequencies, target) {\n    // Write your Two Pointer solution here\n    \n}`,
     },
   },
 };
